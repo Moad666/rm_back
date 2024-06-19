@@ -12,4 +12,11 @@ class User(AbstractUser):
     REQUIRED_FIELDS = []
 
 
+class Rules(models.Model):
+    ruleName = models.CharField(max_length=255)
+    description = models.CharField(max_length=255)
+    condition = models.CharField(max_length=255)
+    action = models.CharField(max_length=255)
+
+
 

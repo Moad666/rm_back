@@ -1,8 +1,8 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import User
-from .serializers import UserSerializer
+from .models import User, Rules
+from .serializers import UserSerializer, RulesSerializer
 from rest_framework.exceptions import AuthenticationFailed
 import jwt,datetime
 from django.views.decorators.csrf import csrf_exempt
@@ -67,4 +67,16 @@ class UserListAPIView(generics.ListAPIView):
 class UserDeleteAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = []
+
+# Create Rule
+class RuleCreateAPIView(generics.ListCreateAPIView):
+    queryset = Rules.objects.all()
+    serializer_class = RulesSerializer
+    permission_classes = []
+
+# List Rules
+class RuleListAPIView(generics.ListAPIView):
+    queryset = Rules.objects.all()
+    serializer_class = RulesSerializer
     permission_classes = []
