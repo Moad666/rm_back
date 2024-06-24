@@ -18,5 +18,9 @@ class Rules(models.Model):
     condition = models.CharField(max_length=255)
     action = models.CharField(max_length=255)
 
+class Categorie(models.Model):
+    name = models.CharField(max_length=255)
+    rule = models.ForeignKey(Rules, on_delete=models.CASCADE)
+
 
 
