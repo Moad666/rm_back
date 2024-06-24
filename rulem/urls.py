@@ -1,5 +1,5 @@
 from django.urls import path
-from .views import Register, Login, UserListAPIView,UserDeleteAPIView, RuleCreateAPIView,RuleListAPIView
+from .views import *
 
 urlpatterns = [
     # User
@@ -11,4 +11,6 @@ urlpatterns = [
     # Rules
     path('create_rule/', RuleCreateAPIView.as_view(), name='rule-create'),
     path('list_rule/', RuleListAPIView.as_view(), name='rule-list'),
+    path('update_rule/<int:pk>', RuleUpdateAPIView.as_view(), name='rule-update'),
+    path('delete_rule/<int:pk>', RuleDeleteAPIView.as_view(), name='rule-delete'),
 ]

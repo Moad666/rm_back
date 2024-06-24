@@ -80,3 +80,16 @@ class RuleListAPIView(generics.ListAPIView):
     queryset = Rules.objects.all()
     serializer_class = RulesSerializer
     permission_classes = []
+
+# Update Rules
+class RuleUpdateAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Rules.objects.all()
+    serializer_class = RulesSerializer
+    permission_classes = []
+
+# Delete Rule
+class RuleDeleteAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Rules.objects.all()
+    serializer_class = RulesSerializer
+    permission_classes = []
+
