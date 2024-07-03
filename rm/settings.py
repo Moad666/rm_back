@@ -49,6 +49,7 @@ AUTH_USER_MODEL = 'rulem.User'
 #     ],
 # }
 
+
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
