@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import User, Rules
+from .models import User, Rules, Categorie
 
 
 # convert User model instances into JSON format.
@@ -28,5 +28,11 @@ class UserSerializer(serializers.ModelSerializer):
 class RulesSerializer(serializers.ModelSerializer):
     class Meta:
         model = Rules
+        fields = '__all__'
+
+
+class CategorieSerializer(serializers.ModelSerializer):
+    class Meta :
+        model = Categorie
         fields = '__all__'
 

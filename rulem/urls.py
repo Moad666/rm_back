@@ -13,4 +13,8 @@ urlpatterns = [
     path('list_rule/', RuleListAPIView.as_view(), name='rule-list'),
     path('update_rule/<int:pk>', RuleUpdateAPIView.as_view(), name='rule-update'),
     path('delete_rule/<int:pk>', RuleDeleteAPIView.as_view(), name='rule-delete'),
+
+    # Categorie
+    path('create_categorie/', CategorieCreateAPIView.as_view(), name='categorie-create'),
+    path('delete_categorie/<int:pk>', CategorieDeleteAPIView.as_view(), name='categorie-delete'),
 ]

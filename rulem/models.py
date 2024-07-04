@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
+from django.core.exceptions import ValidationError
+
 
 
 class User(AbstractUser):
@@ -21,6 +23,11 @@ class Rules(models.Model):
 class Categorie(models.Model):
     name = models.CharField(max_length=255)
     rule = models.ForeignKey(Rules, on_delete=models.CASCADE)
+
+    def delete(self, *args, **kwargs):
+        if self.rule_id is not None:
+            raise ValidationError("Cannot delete Categorie because it contains a rule.")
+        super().delete(*args, **kwargs)
 
 
 

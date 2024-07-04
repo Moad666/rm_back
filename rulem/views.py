@@ -1,13 +1,15 @@
 from django.shortcuts import render
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from .models import User, Rules
-from .serializers import UserSerializer, RulesSerializer
+from .models import User, Rules, Categorie
+from .serializers import UserSerializer, RulesSerializer, CategorieSerializer
 from rest_framework.exceptions import AuthenticationFailed
 import jwt,datetime
 from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
-from rest_framework import generics, permissions
+from rest_framework import generics, permissions, status
+from django.core.exceptions import ValidationError
+
 
 
 
@@ -93,3 +95,23 @@ class RuleDeleteAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = RulesSerializer
     permission_classes = []
 
+
+# Create Categorie
+class CategorieCreateAPIView(generics.ListCreateAPIView):
+    queryset = Categorie.objects.all()
+    serializer_class = CategorieSerializer
+    permission_classes = []
+
+# Delete Categorie
+class CategorieDeleteAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Categorie.objects.all()
+    serializer_class = CategorieSerializer
+    permission_classes = []
+
+    def delete(self, request, *args, **kwargs):
+        instance = self.get_object()
+        try:
+            instance.delete()
+        except ValidationError as e:
+            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
+        return Response(status=status.HTTP_204_NO_CONTENT)
