@@ -17,4 +17,6 @@ urlpatterns = [
     # Categorie
     path('create_categorie/', CategorieCreateAPIView.as_view(), name='categorie-create'),
     path('delete_categorie/<int:pk>', CategorieDeleteAPIView.as_view(), name='categorie-delete'),
+    path('update_categorie/<int:pk>', CatgorieUpdateAPIView.as_view(), name='categorie-update'),
+    path('list_categorie/', CategorieListAPIView.as_view(), name='categorie-list'),
 ]

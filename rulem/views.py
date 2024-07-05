@@ -108,10 +108,15 @@ class CategorieDeleteAPIView(generics.RetrieveUpdateDestroyAPIView):
     serializer_class = CategorieSerializer
     permission_classes = []
 
-    def delete(self, request, *args, **kwargs):
-        instance = self.get_object()
-        try:
-            instance.delete()
-        except ValidationError as e:
-            return Response({"error": str(e)}, status=status.HTTP_400_BAD_REQUEST)
-        return Response(status=status.HTTP_204_NO_CONTENT)
+
+# Update Categorie
+class CatgorieUpdateAPIView(generics.RetrieveUpdateDestroyAPIView):
+    queryset = Categorie.objects.all()
+    serializer_class = CategorieSerializer
+    permission_classes = []
+
+# List Categorie
+class CategorieListAPIView(generics.ListAPIView):
+    queryset = Categorie.objects.all()
+    serializer_class = CategorieSerializer
+    permission_classes = []

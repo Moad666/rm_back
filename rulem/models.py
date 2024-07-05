@@ -13,21 +13,18 @@ class User(AbstractUser):
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
 
+class Categorie(models.Model):
+    name = models.CharField(max_length=255)
+
 
 class Rules(models.Model):
     ruleName = models.CharField(max_length=255)
     description = models.CharField(max_length=255)
     condition = models.CharField(max_length=255)
     action = models.CharField(max_length=255)
+    categorie = models.ForeignKey(Categorie, null=True, blank=True, on_delete=models.PROTECT)
 
-class Categorie(models.Model):
-    name = models.CharField(max_length=255)
-    rule = models.ForeignKey(Rules, on_delete=models.CASCADE)
 
-    def delete(self, *args, **kwargs):
-        if self.rule_id is not None:
-            raise ValidationError("Cannot delete Categorie because it contains a rule.")
-        super().delete(*args, **kwargs)
 
 
 
