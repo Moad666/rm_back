@@ -9,6 +9,12 @@ from django.views.decorators.csrf import csrf_exempt
 from django.http import JsonResponse
 from rest_framework import generics, permissions, status
 from django.core.exceptions import ValidationError
+from django.core.files.storage import FileSystemStorage
+import zipfile
+import csv
+import os
+import uuid
+
 
 
 
@@ -120,3 +126,102 @@ class CategorieListAPIView(generics.ListAPIView):
     queryset = Categorie.objects.all()
     serializer_class = CategorieSerializer
     permission_classes = []
+
+
+@csrf_exempt
+def upload_file(request):
+    if request.method == 'POST' and request.FILES['file']:
+        file = request.FILES['file']
+        fs = FileSystemStorage()
+        filename = fs.save(file.name, file)
+        file_path = fs.path(filename)
+        upload_id = str(uuid.uuid4())
+        
+        
+        # Determine file type and call the appropriate extraction function
+        if filename.endswith('.zip'):
+            extracted_data = extract_data_from_zip(file_path,upload_id)
+        elif filename.endswith('.txt'):
+            extracted_data = extract_data_from_file(file_path, upload_id)
+        else:
+            return JsonResponse({'error': "Unsupported file type."}, status=400)
+        
+        if not extracted_data:
+            return JsonResponse({'error': "No data extracted from the file."}, status=400)
+
+        save_to_database(extracted_data)
+        # index_to_elasticsearch(extracted_data)
+
+        return JsonResponse({'message': extracted_data})
+    return JsonResponse({'error': 'Invalid request method or no file uploaded'}, status=405)
+
+import json
+
+def parse_rule_text(rule_text, upload_id):
+    lines = rule_text.strip().split('\n')
+    rule_data = {}
+    rule_data['id_upload'] = upload_id 
+    
+    i = 0
+    while i < len(lines):
+        if lines[i].startswith('name: '):
+            rule_data['name'] = lines[i].split(': ', 1)[1].strip()
+            i += 1
+        elif lines[i].startswith('description: '):
+            description_lines = [lines[i].split(': ', 1)[1].strip()]
+            i += 1
+            while i < len(lines) and not lines[i].strip().startswith('if'):
+                description_lines.append(lines[i].strip())
+                i += 1
+            rule_data['description'] = ' '.join(description_lines).strip()
+        elif lines[i].strip().startswith('if'):
+            condition = []
+            while i < len(lines) and not lines[i].strip().startswith('then'):
+                condition.append(lines[i].strip())
+                i += 1
+            rule_data['condition'] = ' '.join(condition).strip()
+        elif lines[i].strip().startswith('then'):
+            action = []
+            while i < len(lines) and not lines[i].startswith('name: '):
+                action.append(lines[i].strip())
+                i += 1
+            rule_data['action'] = ' '.join(action).strip()
+        else:
+            i += 1
+            
+    return rule_data
+
+
+def extract_data_from_file(file_path, upload_id):
+    with open(file_path, 'r') as file:
+        file_content = file.read()
+    
+    rules = file_content.strip().split('\n\n')
+    extracted_data = []
+    for rule in rules:
+        rule_json = parse_rule_text(rule, upload_id)
+        extracted_data.append(rule_json)
+        
+    return extracted_data
+
+def extract_data_from_zip(zip_file_path, upload_id):
+    extracted_data = []
+    with zipfile.ZipFile(zip_file_path, 'r') as zip_ref:
+        zip_ref.extractall("extracted_zip")
+        for file_name in zip_ref.namelist():
+            if file_name.endswith('.txt'):
+                extracted_data.extend(extract_data_from_file(os.path.join("extracted_zip", file_name)))
+            elif file_name.endswith('.csv'):
+                extracted_data.extend(extract_data_from_csv(os.path.join("extracted_zip", file_name)))
+    return extracted_data
+
+def save_to_database(data):
+    for item in data:
+        rule = Rules(
+            ruleName=item['name'],
+            description=item['description'],
+            condition=item['condition'],
+            action=item['action'],
+            id_upload=item['id_upload']
+        )
+        rule.save()

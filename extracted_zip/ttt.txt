@@ -1,0 +1,14 @@
+name: tttttttttttttttttttttttttttttttttttttttttttttttttttttttttttt
+description: definitions
+    set 'Proposed Effective Date' to the application proposed effective date of the enrollment application submission of 'the odm consumer data request' ;
+if
+    'Proposed Effective Date' is not null
+    and 'Proposed Effective Date' is not empty
+    and convert 'Proposed Effective Date' to date is not null
+    and Date format check of 'Proposed Effective Date' is true
+    and check 'Proposed Effective Date' a valid date is true
+    and ( ( convert 'Proposed Effective Date' to date is before set a date 365 days prior to current date )
+    or ( convert 'Proposed Effective Date' to date is after add 180 days to the date current date ) )
+then
+    add the error message with ruleset name - "MCARE Policy - Proposed Effective Date Basic" , issue code "P0000025" , action code "" , from value of 'Proposed Effective Date'  and to value of "" for the Proposed Effective Date issue of 'the odm consumer data response' ;
+

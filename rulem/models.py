@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.core.exceptions import ValidationError
+import uuid
+
 
 
 
@@ -23,6 +25,7 @@ class Rules(models.Model):
     condition = models.CharField(max_length=255)
     action = models.CharField(max_length=255)
     categorie = models.ForeignKey(Categorie, null=True, blank=True, on_delete=models.PROTECT)
+    id_upload = models.CharField(max_length=255, default=uuid.uuid4)
 
 
 
