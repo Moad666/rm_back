@@ -22,4 +22,6 @@ urlpatterns = [
 
     # upload
     path('upload/', upload_file, name='upload_file'),
+    path('rules/<str:id_upload>/', get_rules_by_upload_id, name='get_rules_by_upload_id'),
+
 ]

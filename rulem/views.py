@@ -127,7 +127,7 @@ class CategorieListAPIView(generics.ListAPIView):
     serializer_class = CategorieSerializer
     permission_classes = []
 
-
+# upload file
 @csrf_exempt
 def upload_file(request):
     if request.method == 'POST' and request.FILES['file']:
@@ -225,3 +225,14 @@ def save_to_database(data):
             id_upload=item['id_upload']
         )
         rule.save()
+
+
+# Get rules by upload_id
+
+def get_rules_by_upload_id(request, id_upload):
+    try:
+        rules = Rules.objects.filter(id_upload=id_upload)
+        rules_data = list(rules.values('ruleName', 'description', 'condition', 'action', 'categorie'))
+        return JsonResponse({'status': 'success', 'data': rules_data}, status=200)
+    except Rules.DoesNotExist:
+        return JsonResponse({'status': 'error', 'message': 'Rules not found'}, status=404)
