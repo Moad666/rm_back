@@ -14,6 +14,8 @@ import zipfile
 import csv
 import os
 import uuid
+from rest_framework.permissions import IsAuthenticated
+
 
 
 
@@ -160,12 +162,17 @@ import json
 def parse_rule_text(rule_text, upload_id):
     lines = rule_text.strip().split('\n')
     rule_data = {}
-    rule_data['id_upload'] = upload_id 
+    rule_data['id_upload'] = upload_id
+    rule_data['ruleName']= ''
+    rule_data['description']= ''
+    rule_data['condition']= ''
+    rule_data['action']= ''
+    rule_data['categorie']= None
     
     i = 0
     while i < len(lines):
-        if lines[i].startswith('name: '):
-            rule_data['name'] = lines[i].split(': ', 1)[1].strip()
+        if lines[i].startswith('name:'):
+            rule_data['ruleName'] = lines[i].split(': ', 1)[1].strip()
             i += 1
         elif lines[i].startswith('description: '):
             description_lines = [lines[i].split(': ', 1)[1].strip()]
@@ -218,11 +225,12 @@ def extract_data_from_zip(zip_file_path, upload_id):
 def save_to_database(data):
     for item in data:
         rule = Rules(
-            ruleName=item['name'],
+            ruleName=item['ruleName'],
             description=item['description'],
             condition=item['condition'],
             action=item['action'],
-            id_upload=item['id_upload']
+            id_upload=item['id_upload'],
+            categorie=None
         )
         rule.save()
         item['id'] = rule.id

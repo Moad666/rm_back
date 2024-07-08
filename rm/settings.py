@@ -74,6 +74,7 @@ CORS_ALLOW_METHODS = (
     "PUT",
 )
 
+
 ROOT_URLCONF = 'rm.urls'
 
 TEMPLATES = [
