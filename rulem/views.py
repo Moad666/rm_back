@@ -149,10 +149,10 @@ def upload_file(request):
         if not extracted_data:
             return JsonResponse({'error': "No data extracted from the file."}, status=400)
 
-        save_to_database(extracted_data)
+        data = save_to_database(extracted_data)
         # index_to_elasticsearch(extracted_data)
 
-        return JsonResponse({'message': extracted_data})
+        return JsonResponse({'message': data})
     return JsonResponse({'error': 'Invalid request method or no file uploaded'}, status=405)
 
 import json
@@ -225,7 +225,8 @@ def save_to_database(data):
             id_upload=item['id_upload']
         )
         rule.save()
-
+        item['id'] = rule.id
+    return data
 
 # Get rules by upload_id
 
