@@ -15,6 +15,9 @@ import csv
 import os
 import uuid
 from rest_framework.permissions import IsAuthenticated
+from rest_framework.authentication import BaseAuthentication
+from rest_framework.decorators import authentication_classes, permission_classes
+
 
 
 
@@ -67,72 +70,125 @@ class Login(APIView):
         
         return response
 
+class JWTAuthentication(BaseAuthentication):
+    def authenticate(self, request):
+        auth_header = request.headers.get('Authorization', None)
+
+        if auth_header is None:
+            raise AuthenticationFailed('Authorization header missing')
+
+        auth_token = auth_header.split()
+
+        if len(auth_token) != 2 or auth_token[0].lower() != 'bearer':
+            raise AuthenticationFailed('Invalid authorization header')
+
+        token = auth_token[1]
+
+        try:
+            payload = jwt.decode(token, 'secret', algorithms=['HS256'])
+        except jwt.ExpiredSignatureError:
+            raise AuthenticationFailed('Token has expired')
+        except jwt.InvalidTokenError:
+            raise AuthenticationFailed('Invalid token')
+
+        user = User.objects.filter(id=payload['id']).first()
+
+        if user is None:
+            raise AuthenticationFailed('User not found')
+
+        return (user, None)
+
+
 # get all Users
 class UserListAPIView(generics.ListAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = []
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
 # Delete User
 class UserDeleteAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = User.objects.all()
     serializer_class = UserSerializer
-    permission_classes = []
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
 # Create Rule
 class RuleCreateAPIView(generics.ListCreateAPIView):
     queryset = Rules.objects.all()
     serializer_class = RulesSerializer
-    permission_classes = []
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
 # List Rules
 class RuleListAPIView(generics.ListAPIView):
     queryset = Rules.objects.all()
     serializer_class = RulesSerializer
-    permission_classes = []
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
 # Update Rules
 class RuleUpdateAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Rules.objects.all()
     serializer_class = RulesSerializer
-    permission_classes = []
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
 # Delete Rule
 class RuleDeleteAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Rules.objects.all()
     serializer_class = RulesSerializer
-    permission_classes = []
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
 
 # Create Categorie
 class CategorieCreateAPIView(generics.ListCreateAPIView):
     queryset = Categorie.objects.all()
     serializer_class = CategorieSerializer
-    permission_classes = []
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
 # Delete Categorie
 class CategorieDeleteAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Categorie.objects.all()
     serializer_class = CategorieSerializer
-    permission_classes = []
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
 
 # Update Categorie
 class CatgorieUpdateAPIView(generics.RetrieveUpdateDestroyAPIView):
     queryset = Categorie.objects.all()
     serializer_class = CategorieSerializer
-    permission_classes = []
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
 # List Categorie
 class CategorieListAPIView(generics.ListAPIView):
     queryset = Categorie.objects.all()
     serializer_class = CategorieSerializer
-    permission_classes = []
+    authentication_classes = [JWTAuthentication]
+    permission_classes = [IsAuthenticated]
 
 # upload file
 @csrf_exempt
+@authentication_classes([JWTAuthentication])
+@permission_classes([IsAuthenticated])
 def upload_file(request):
     if request.method == 'POST' and request.FILES['file']:
+        
+        authentication = JWTAuthentication()
+        try:
+            user, _ = authentication.authenticate(request)
+        except AuthenticationFailed as e:
+            return JsonResponse({'error': str(e)}, status=401)
+
+        # Ensure user is authenticated before proceeding
+        if not user or not user.is_authenticated:
+            return JsonResponse({'error': 'User not authenticated'}, status=401)
+
+
         file = request.FILES['file']
         fs = FileSystemStorage()
         filename = fs.save(file.name, file)
